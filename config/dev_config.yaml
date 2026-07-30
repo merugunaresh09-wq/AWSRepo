@@ -1,0 +1,67 @@
+pipeline:
+  name: HOSPITAL_ETL_PIPELINE
+
+source:
+  file_path: /Volumes/etl_pipeline_outputs/etl_schema/etl_volume/LANDING_ZONE/
+  format: csv
+  header: true
+  mode: DROPMALFORMED
+
+processed_files:
+  file_path: /Volumes/etl_pipeline_outputs/etl_schema/etl_volume/PROCESSED_FILES/
+
+sink:
+  file_path: /Volumes/etl_pipeline_outputs/etl_schema/etl_volume/SINK/
+  format: csv
+  header: true
+  mode: overwrite
+
+audit:
+  file_path: /Volumes/etl_pipeline_outputs/etl_schema/etl_volume/AUDIT/
+
+dq_results:
+  file_path: /Volumes/etl_pipeline_outputs/etl_schema/etl_volume/DQ_RESULTS/
+
+transformations:
+
+  remove_duplicates: true
+
+  trim_columns:
+    - doctor_name
+    - patient_name
+    - disease
+    - hospital_name
+    - city
+
+  lower_case_columns:
+    - disease
+
+  fill_nulls:
+    column: patient_name
+    value: UNKNOWN
+
+  quantity_filter:
+    column: treatment_cost
+    value: 0
+
+  revenue_labels:
+    column: treatment_cost
+    high: 100000
+    medium: 50000
+
+business_keys:
+  - patient_id
+
+scdtype1_columns:
+  - doctor_name
+  - disease
+  - treatment_cost
+
+scdtype2_columns:
+  - treatment_cost
+
+order_status_validation:
+  valid_values:
+    - admitted
+    - discharged
+    - under treatment
